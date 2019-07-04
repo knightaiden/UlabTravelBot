@@ -11,6 +11,33 @@ $("#replyBtn").click(function(){
     console.log(time);
     $('textarea').val('');
     console.log(mesg);
+    console.log('ss')
+//    make object
+    var sendMsg = new Object();
+    sendMsg.topicId = 1;
+    sendMsg.speakerId = 2;
+    sendMsg.type = 1;
+    sendMsg.content = mesg;
+
+    console.log(sendMsg);
+
+//    post json
+    $.ajax({
+        type: "POST",
+    	contentType: "application/json",
+    	url: "/sendMsg",
+    	data: JSON.stringify(sendMsg),
+    	dataType: 'json',
+    	timeout: 600,
+        success: function (data) {
+        alert('success');
+    	},
+    	error: function (e) {
+    	    alert('err')
+            }
+    	});
+
+
     $("#conversation").append(megContainer1 + mesg + megContainer2 + time + megContainer3);
     $('#conversation').animate({
         scrollTop: $('#conversation').get(0).scrollHeight}, 300); 
@@ -33,3 +60,21 @@ $("#robotIcon").click(function(){
     $('#conversation').animate({
         scrollTop: $('#conversation').get(0).scrollHeight}, 300); 
 })
+
+//$(document).ready(function() {
+//    $.ajax({
+//            type: "GET",
+//        	contentType: "application/json",
+//        	url: "/sendMsg",
+//        	data: JSON.stringify(sendMsg),
+//        	dataType: 'json',
+//        	timeout: 600,
+//            success: function (data) {
+//            alert('success');
+//        	},
+//        	error: function (e) {
+//        	    alert('err')
+//                }
+//        	});
+//
+//});
