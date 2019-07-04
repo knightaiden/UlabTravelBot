@@ -33,6 +33,9 @@ public class AuthService {
     @Autowired
     private AuthMapper authMapper;
 
+    @Autowired
+    private OkHttpClient okHttpClient;
+
     public AuthInfo getAuthInfoById(long id) {
         return authMapper.selectById(id);
     }
@@ -51,13 +54,12 @@ public class AuthService {
         logger.info("starting to update pat token");
         AuthInfo patAuthInfo = getAuthInfoById(patAuthId);
         String refreshTokenUrl = String.format(patAuthUrl, patAuthInfo.getClient_key(), patAuthInfo.getSecret_key());
-        OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
                 .url(refreshTokenUrl)
                 .build();
         logger.info("sending request to pat server");
         logger.debug(refreshTokenUrl);
-        Response response = client.newCall(request).execute();
+        Response response = okHttpClient.newCall(request).execute();
         String result = response.body().string();
         logger.debug(refreshTokenUrl);
         Gson gson = new Gson();

@@ -30,17 +30,17 @@ public class DialogController {
 
     @RequestMapping("/sendMsg")
     public Message sendMsg(@RequestBody Message question) {
-        Message answer = new Message();
+        Message answer = dialogService.processMsg(question);
         return answer;
     }
 
-    @RequestMapping("/sendMsgSimple")
-    public Message sendMsg() throws IOException {
-        String q = "";
-        String ans = dialogService.sendMsg(q);
-        Message answer = new Message();
-        answer.setContent(ans);
-        return answer;
-    }
+//    @RequestMapping("/sendMsgSimple")
+//    public Message sendMsg() throws IOException {
+//        String q = "";
+//        String ans = dialogService.sendMsg(q);
+//        Message answer = new Message();
+//        answer.setContent(ans);
+//        return answer;
+//    }
 
 }
