@@ -23,11 +23,6 @@ public class DialogController {
     @Autowired
     private DialogService dialogService;
 
-    @RequestMapping("/")
-    public String index() {
-        return "index";
-    }
-
     @RequestMapping("/sendMsg")
     public Message sendMsg(@RequestBody Message question) {
         Message answer = dialogService.processMsg(question);
