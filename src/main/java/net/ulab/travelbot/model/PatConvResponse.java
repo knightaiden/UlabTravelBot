@@ -1,17 +1,16 @@
 package net.ulab.travelbot.model;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 /**
  * Created by zhangzhe on 4/7/19.
  */
-@SuppressWarnings("unused")
-@Getter(value = AccessLevel.PUBLIC)
-@Setter(value = AccessLevel.PUBLIC)
+@Data
 public class PatConvResponse {
 
+    private boolean success;
+    private String message;
+    private net.ulab.travelbot.model.patresponse.Data data;
 
 
 }
