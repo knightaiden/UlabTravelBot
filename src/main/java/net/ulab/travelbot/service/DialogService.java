@@ -1,6 +1,9 @@
 package net.ulab.travelbot.service;
 
+import com.google.gson.Gson;
 import net.ulab.travelbot.model.Message;
+import net.ulab.travelbot.model.PatConvRequest;
+import net.ulab.travelbot.model.PatConvResponse;
 import okhttp3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,23 +35,29 @@ public class DialogService {
 
     public Message processMsg(Message message) {
         String token = authService.getTokenById(patId);
+        Gson phaser = new Gson();
+        PatConvRequest requestData = new PatConvRequest();
+        requestData.setUser_key(message.getSpeakerId());
+        requestData.setData_to_match(message.getContent());
         Request request = new Request.Builder()
                 .url(patConvUrl)
                 .addHeader("Authorization", token)
                 .post(RequestBody
                         .create(MediaType.parse("application/json"),
-                                "{\n" +
-                                        "  \"data_to_match\": \"what is shark doing?\",\n" +
-                                        "  \"user_key\": \"eedf54ae-fe22-4a50-bff2-061ec1618d54\"\n" +
-                                        "}"))
+                                phaser.toJson(requestData)))
                 .build();
+        Message answer = new Message();
         try {
             Response response = okHttpClient.newCall(request).execute();
             String res = response.body().string();
+            logger.info(res);
+            PatConvResponse patResponse = phaser.fromJson(res, PatConvResponse.class);
+            answer.setSpeakerId(patResponse.getData().getUser_key());
+            answer.setContent(patResponse.getData().getConverse_response().getCurrentResponse().getWhatSaid());
         } catch (IOException e) {
             logger.error("Problem on connecting PAT api service!");
+            answer.setContent("hmmmm.... not quit understand");
         }
-        Message answer = new Message();
         return answer;
     }
 
