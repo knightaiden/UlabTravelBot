@@ -29,13 +29,4 @@ public class DialogController {
         return answer;
     }
 
-//    @RequestMapping("/sendMsgSimple")
-//    public Message sendMsg() throws IOException {
-//        String q = "";
-//        String ans = dialogService.sendMsg(q);
-//        Message answer = new Message();
-//        answer.setContent(ans);
-//        return answer;
-//    }
-
 }

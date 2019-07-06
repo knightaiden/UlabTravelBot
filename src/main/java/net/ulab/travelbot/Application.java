@@ -11,7 +11,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 /**
  * Created by zhangzhe on 3/7/19.
  */
-@SpringBootApplication//(exclude = {DataSourceAutoConfiguration.class})
+@SpringBootApplication
 @MapperScan(basePackages = "net.ulab.travelbot.mapper")
 public class Application {
 
