@@ -6,7 +6,7 @@ $("#replyBtn").click(function(){
 $("#comment").keypress(function (e) {
 if(e.which == 13) {
        handleSubmit();
-       $('textarea').val('');
+       event.preventDefault();
    }
 });
 
