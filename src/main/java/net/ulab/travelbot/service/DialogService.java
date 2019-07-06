@@ -59,7 +59,10 @@ public class DialogService {
             logger.info(res);
             PatConvResponse patResponse = phaser.fromJson(res, PatConvResponse.class);
             if ("".equals(userKey)) {
-                patUsers.updatePatUserKeyByFID(patResponse.getData().getUser_key(), message.getSpeakerId());
+                PatUser newUser = new PatUser();
+                newUser.setPat_user_key(patResponse.getData().getUser_key());
+                newUser.setFrontend_key(message.getSpeakerId());
+                patUsers.insertPatUserInfo(newUser);
             }
             answer.setSpeakerId(patResponse.getData().getUser_key());
             answer.setContent(patResponse.getData().getConverse_response().getCurrentResponse().getWhatSaid());

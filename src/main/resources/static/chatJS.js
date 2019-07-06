@@ -40,7 +40,7 @@ handleSubmit = () => {
 //    make object
     var sendMsg = new Object();
     sendMsg.topicId = 1;
-    sendMsg.speakerId = "";
+    sendMsg.speakerId = "a1b2";
     sendMsg.type = 1;
     sendMsg.content = mesg;
 //    console.log(sendMsg);
