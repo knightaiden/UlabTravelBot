@@ -1,9 +1,11 @@
 package net.ulab.travelbot.service;
 
 import com.google.gson.Gson;
+import net.ulab.travelbot.mapper.PatUsers;
 import net.ulab.travelbot.model.Message;
 import net.ulab.travelbot.model.PatConvRequest;
 import net.ulab.travelbot.model.PatConvResponse;
+import net.ulab.travelbot.model.PatUser;
 import okhttp3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,13 +33,17 @@ public class DialogService {
     private AuthService authService;
 
     @Autowired
+    private PatUsers patUsers;
+
+    @Autowired
     private OkHttpClient okHttpClient;
 
     public Message processMsg(Message message) {
         String token = authService.getTokenById(patId);
         Gson phaser = new Gson();
         PatConvRequest requestData = new PatConvRequest();
-        requestData.setUser_key(message.getSpeakerId());
+        String userKey = processUserKey(message.getSpeakerId());
+        requestData.setUser_key(userKey);
         requestData.setData_to_match(message.getContent());
         Request request = new Request.Builder()
                 .url(patConvUrl)
@@ -52,6 +58,9 @@ public class DialogService {
             String res = response.body().string();
             logger.info(res);
             PatConvResponse patResponse = phaser.fromJson(res, PatConvResponse.class);
+            if ("".equals(userKey)) {
+                patUsers.updatePatUserKeyByFID(patResponse.getData().getUser_key(), message.getSpeakerId());
+            }
             answer.setSpeakerId(patResponse.getData().getUser_key());
             answer.setContent(patResponse.getData().getConverse_response().getCurrentResponse().getWhatSaid());
         } catch (IOException e) {
@@ -59,6 +68,14 @@ public class DialogService {
             answer.setContent("hmmmm.... not quit understand");
         }
         return answer;
+    }
+
+    private String processUserKey(String speakerId) {
+        PatUser user = patUsers.getPatUserByFID(speakerId);
+        if (user == null) {
+            return "";
+        }
+        return user.getPat_user_key();
     }
 
 //    public String sendMsg(String question) throws IOException {
