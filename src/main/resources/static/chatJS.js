@@ -1,3 +1,8 @@
+// speakerId generator
+var randomSpeakerId = (Date.now() + Math.floor(1000 + Math.random() * 9000)).toString();
+//console.log(randomSpeakerId);
+//console.log(typeof(randomSpeakerId))
+
 $("#replyBtn").click(function(){
     handleSubmit();
   });
@@ -40,7 +45,7 @@ handleSubmit = () => {
 //    make object
     var sendMsg = new Object();
     sendMsg.topicId = 1;
-    sendMsg.speakerId = "a1b2";
+    sendMsg.speakerId = randomSpeakerId;
     sendMsg.type = 1;
     sendMsg.content = mesg;
 //    console.log(sendMsg);
