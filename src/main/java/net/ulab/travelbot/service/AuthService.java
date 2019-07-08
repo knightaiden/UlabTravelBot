@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,7 +48,9 @@ public class AuthService {
     }
 
     public boolean updateToken(long id, String token) {
-        return authMapper.updateTokenById(token, id) == 1 ? true : false;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String current = sdf.format(new Date());
+        return authMapper.updateTokenById(token, id, current) == 1 ? true : false;
     }
 
 

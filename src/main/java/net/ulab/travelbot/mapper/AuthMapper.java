@@ -18,6 +18,7 @@ public interface AuthMapper {
     @Select("SELECT * FROM auth_config WHERE id=#{id}")
     AuthInfo selectById(long id);
 
-    @Update("UPDATE auth_config SET token=#{token}, last_update=datetime('now', 'localtime')  WHERE id=#{id}")
-    int updateTokenById(@Param("token") String token, @Param("id") long id);
+    //@Update("UPDATE auth_config SET token=#{token}, last_update=datetime('now', 'localtime')  WHERE id=#{id}")
+    @Update("UPDATE auth_config SET token=#{token}, last_update=#{last_update}  WHERE id=#{id}")
+    int updateTokenById(@Param("token") String token, @Param("id") long id, @Param("last_update") String current);
 }
