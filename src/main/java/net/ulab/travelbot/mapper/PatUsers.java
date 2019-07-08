@@ -2,6 +2,8 @@ package net.ulab.travelbot.mapper;
 
 import net.ulab.travelbot.model.PatUser;
 import org.apache.ibatis.annotations.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
 /**
