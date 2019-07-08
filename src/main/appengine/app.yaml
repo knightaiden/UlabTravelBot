@@ -11,6 +11,12 @@ handlers:
 manual_scaling:
   instances: 1
 
+env_variables:
+  CLOUD_SQL_CONNECTION_NAME: "travelrobot:australia-southeast1:travelrobot"
+  DB_NAME: "travelrobot"
+  DB_USER: "root"
+  DB_PASS: "UlabTravel1234"
+
 resources:
   cpu: 1
   memory_gb: 2

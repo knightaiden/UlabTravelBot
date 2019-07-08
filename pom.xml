@@ -62,12 +62,43 @@
             <version>2.8.5</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-gcp-starter</artifactId>
-            <version>1.0.0.RELEASE</version>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.47</version>
         </dependency>
     </dependencies>
 
+    <profiles>
+        <profile>
+            <id>env.dev</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <env.name>dev</env.name>
+                <log.console>&lt;appender-ref ref="CONSOLE"/&gt;</log.console>
+            </properties>
+        </profile>
+        <profile>
+            <id>env.prod</id>
+            <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-gcp-starter</artifactId>
+                <version>1.0.0.RELEASE</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-gcp-starter-sql-mysql</artifactId>
+                <version>1.0.0.RELEASE</version>
+            </dependency>
+            </dependencies>
+            <properties>
+                <env.name>prod</env.name>
+                <log.console>&lt;appender-ref ref="CONSOLE"/&gt;</log.console>
+            </properties>
+        </profile>
+    </profiles>
 
     <build>
         <plugins>
