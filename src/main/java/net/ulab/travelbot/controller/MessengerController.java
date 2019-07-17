@@ -34,6 +34,8 @@ import com.github.messenger4j.webhook.event.*;
 import com.github.messenger4j.webhook.event.attachment.Attachment;
 import com.github.messenger4j.webhook.event.attachment.LocationAttachment;
 import com.github.messenger4j.webhook.event.attachment.RichMediaAttachment;
+import net.ulab.travelbot.model.Message;
+import net.ulab.travelbot.service.DialogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,19 +60,18 @@ import static java.util.Optional.of;
  * Created by zhangzhe on 8/7/19.
  */
 @RestController
-@RequestMapping("/callback")
+@RequestMapping("/messenger")
 public class MessengerController {
 
     private static final String RESOURCE_URL = "https://raw.githubusercontent.com/fbsamples/messenger-platform-samples/master/node/public";
 
     private static final Logger logger = LoggerFactory.getLogger(MessengerController.class);
 
-    private final Messenger messenger;
+    @Autowired
+    private Messenger messenger;
 
     @Autowired
-    public MessengerController(final Messenger messenger) {
-        this.messenger = messenger;
-    }
+    private DialogService dialogService;
 
     /**
      * Webhook verification endpoint. <p> The passed verification token (as query parameter) must match the configured
@@ -119,7 +120,7 @@ public class MessengerController {
                     handleFallbackEvent(event);
                 }
             });
-            logger.debug("Processed callback payload successfully");
+            logger.info("Processed callback payload successfully");
             return ResponseEntity.status(HttpStatus.OK).build();
         } catch (MessengerVerificationException e) {
             logger.warn("Processing of callback payload failed: {}", e.getMessage());
@@ -128,7 +129,7 @@ public class MessengerController {
     }
 
     private void handleTextMessageEvent(TextMessageEvent event) {
-        logger.debug("Received TextMessageEvent: {}", event);
+        logger.info("Received TextMessageEvent: {}", event);
 
         final String messageId = event.messageId();
         final String messageText = event.text();
@@ -354,22 +355,22 @@ public class MessengerController {
     }
 
     private void handleAttachmentMessageEvent(AttachmentMessageEvent event) {
-        logger.debug("Handling QuickReplyMessageEvent");
+        logger.info("Handling QuickReplyMessageEvent");
         final String senderId = event.senderId();
-        logger.debug("senderId: {}", senderId);
+        logger.info("senderId: {}", senderId);
         for (Attachment attachment : event.attachments()) {
             if (attachment.isRichMediaAttachment()) {
                 final RichMediaAttachment richMediaAttachment = attachment.asRichMediaAttachment();
                 final RichMediaAttachment.Type type = richMediaAttachment.type();
                 final URL url = richMediaAttachment.url();
-                logger.debug("Received rich media attachment of type '{}' with url: {}", type, url);
+                logger.info("Received rich media attachment of type '{}' with url: {}", type, url);
                 final String text = String.format("Media %s received (url: %s)", type.name(), url);
                 sendTextMessage(senderId, text);
             } else if (attachment.isLocationAttachment()) {
                 final LocationAttachment locationAttachment = attachment.asLocationAttachment();
                 final double longitude = locationAttachment.longitude();
                 final double latitude = locationAttachment.latitude();
-                logger.debug("Received location information (long: {}, lat: {})", longitude, latitude);
+                logger.info("Received location information (long: {}, lat: {})", longitude, latitude);
                 final String text = String.format("Location received (long: %s, lat: %s)", String.valueOf(longitude), String.valueOf(latitude));
                 sendTextMessage(senderId, text);
             }
@@ -377,51 +378,51 @@ public class MessengerController {
     }
 
     private void handleQuickReplyMessageEvent(QuickReplyMessageEvent event) {
-        logger.debug("Handling QuickReplyMessageEvent");
+        logger.info("Handling QuickReplyMessageEvent");
         final String payload = event.payload();
-        logger.debug("payload: {}", payload);
+        logger.info("payload: {}", payload);
         final String senderId = event.senderId();
-        logger.debug("senderId: {}", senderId);
+        logger.info("senderId: {}", senderId);
         final String messageId = event.messageId();
-        logger.debug("messageId: {}", messageId);
+        logger.info("messageId: {}", messageId);
         logger.info("Received quick reply for message '{}' with payload '{}'", messageId, payload);
         sendTextMessage(senderId, "Quick reply tapped");
     }
 
     private void handlePostbackEvent(PostbackEvent event) {
-        logger.debug("Handling PostbackEvent");
+        logger.info("Handling PostbackEvent");
         final String payload = event.payload().orElse("empty payload");
-        logger.debug("payload: {}", payload);
+        logger.info("payload: {}", payload);
         final String senderId = event.senderId();
-        logger.debug("senderId: {}", senderId);
+        logger.info("senderId: {}", senderId);
         final Instant timestamp = event.timestamp();
-        logger.debug("timestamp: {}", timestamp);
+        logger.info("timestamp: {}", timestamp);
         logger.info("Received postback for user '{}' and page '{}' with payload '{}' at '{}'", senderId, senderId, payload, timestamp);
         sendTextMessage(senderId, "Postback event tapped");
     }
 
     private void handleAccountLinkingEvent(AccountLinkingEvent event) {
-        logger.debug("Handling AccountLinkingEvent");
+        logger.info("Handling AccountLinkingEvent");
         final String senderId = event.senderId();
-        logger.debug("senderId: {}", senderId);
+        logger.info("senderId: {}", senderId);
         final AccountLinkingEvent.Status accountLinkingStatus = event.status();
-        logger.debug("accountLinkingStatus: {}", accountLinkingStatus);
+        logger.info("accountLinkingStatus: {}", accountLinkingStatus);
         final String authorizationCode = event.authorizationCode().orElse("Empty authorization code!!!"); //You can throw an Exception
-        logger.debug("authorizationCode: {}", authorizationCode);
+        logger.info("authorizationCode: {}", authorizationCode);
         logger.info("Received account linking event for user '{}' with status '{}' and auth code '{}'", senderId, accountLinkingStatus, authorizationCode);
         sendTextMessage(senderId, "AccountLinking event tapped");
     }
 
     private void handleOptInEvent(OptInEvent event) {
-        logger.debug("Handling OptInEvent");
+        logger.info("Handling OptInEvent");
         final String senderId = event.senderId();
-        logger.debug("senderId: {}", senderId);
+        logger.info("senderId: {}", senderId);
         final String recipientId = event.recipientId();
-        logger.debug("recipientId: {}", recipientId);
+        logger.info("recipientId: {}", recipientId);
         final String passThroughParam = event.refPayload().orElse("empty payload");
-        logger.debug("passThroughParam: {}", passThroughParam);
+        logger.info("passThroughParam: {}", passThroughParam);
         final Instant timestamp = event.timestamp();
-        logger.debug("timestamp: {}", timestamp);
+        logger.info("timestamp: {}", timestamp);
 
         logger.info("Received authentication for user '{}' and page '{}' with pass through param '{}' at '{}'", senderId, recipientId, passThroughParam,
                 timestamp);
@@ -429,27 +430,27 @@ public class MessengerController {
     }
 
     private void handleMessageEchoEvent(MessageEchoEvent event) {
-        logger.debug("Handling MessageEchoEvent");
+        logger.info("Handling MessageEchoEvent");
         final String senderId = event.senderId();
-        logger.debug("senderId: {}", senderId);
+        logger.info("senderId: {}", senderId);
         final String recipientId = event.recipientId();
-        logger.debug("recipientId: {}", recipientId);
+        logger.info("recipientId: {}", recipientId);
         final String messageId = event.messageId();
-        logger.debug("messageId: {}", messageId);
+        logger.info("messageId: {}", messageId);
         final Instant timestamp = event.timestamp();
-        logger.debug("timestamp: {}", timestamp);
+        logger.info("timestamp: {}", timestamp);
 
         logger.info("Received echo for message '{}' that has been sent to recipient '{}' by sender '{}' at '{}'", messageId, recipientId, senderId, timestamp);
         sendTextMessage(senderId, "MessageEchoEvent tapped");
     }
 
     private void handleMessageDeliveredEvent(MessageDeliveredEvent event) {
-        logger.debug("Handling MessageDeliveredEvent");
+        logger.info("Handling MessageDeliveredEvent");
         final String senderId = event.senderId();
-        logger.debug("senderId: {}", senderId);
+        logger.info("senderId: {}", senderId);
         final List<String> messageIds = event.messageIds().orElse(Collections.emptyList());
         final Instant watermark = event.watermark();
-        logger.debug("watermark: {}", watermark);
+        logger.info("watermark: {}", watermark);
 
         messageIds.forEach(messageId -> {
             logger.info("Received delivery confirmation for message '{}'", messageId);
@@ -459,19 +460,19 @@ public class MessengerController {
     }
 
     private void handleMessageReadEvent(MessageReadEvent event) {
-        logger.debug("Handling MessageReadEvent");
+        logger.info("Handling MessageReadEvent");
         final String senderId = event.senderId();
-        logger.debug("senderId: {}", senderId);
+        logger.info("senderId: {}", senderId);
         final Instant watermark = event.watermark();
-        logger.debug("watermark: {}", watermark);
+        logger.info("watermark: {}", watermark);
 
         logger.info("All messages before '{}' were read by user '{}'", watermark, senderId);
     }
 
     private void handleFallbackEvent(Event event) {
-        logger.debug("Handling FallbackEvent");
+        logger.info("Handling FallbackEvent");
         final String senderId = event.senderId();
-        logger.debug("senderId: {}", senderId);
+        logger.info("senderId: {}", senderId);
 
         logger.info("Received unsupported message from user '{}'", senderId);
     }
@@ -482,7 +483,12 @@ public class MessengerController {
             final NotificationType notificationType = NotificationType.REGULAR;
             final String metadata = "DEVELOPER_DEFINED_METADATA";
 
-            final TextMessage textMessage = TextMessage.create(text, empty(), of(metadata));
+            Message fbMessage = new Message();
+            fbMessage.setContent(text);
+            fbMessage.setSpeakerId(recipientId);
+            Message result = dialogService.processMsg(fbMessage);
+
+            final TextMessage textMessage = TextMessage.create(result.getContent(), empty(), of(metadata));
             final MessagePayload messagePayload = MessagePayload.create(recipient, MessagingType.RESPONSE, textMessage,
                     of(notificationType), empty());
             this.messenger.send(messagePayload);
