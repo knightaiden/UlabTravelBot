@@ -25,7 +25,7 @@ public class DialogController {
 
     @RequestMapping("/sendMsg")
     public Message sendMsg(@RequestBody Message question) {
-        Message answer = dialogService.processMsg(question);
+        Message answer = dialogService.sendMeaning(question);
         return answer;
     }
 

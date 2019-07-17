@@ -2,10 +2,8 @@ package net.ulab.travelbot.service;
 
 import com.google.gson.Gson;
 import net.ulab.travelbot.mapper.PatUsers;
-import net.ulab.travelbot.model.Message;
-import net.ulab.travelbot.model.PatConvRequest;
-import net.ulab.travelbot.model.PatConvResponse;
-import net.ulab.travelbot.model.PatUser;
+import net.ulab.travelbot.model.*;
+import net.ulab.travelbot.model.patresponse.MeaningItem;
 import okhttp3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +23,9 @@ public class DialogService {
 
     @Value("${pat.converse.url}")
     private String patConvUrl;
+
+    @Value("${pat.meaning.url}")
+    private String patMeaningUrl;
 
     @Value("${pat.auth.id}")
     private long patId;
@@ -81,22 +82,86 @@ public class DialogService {
         return user.getPat_user_key();
     }
 
-//    public String sendMsg(String question) throws IOException {
-//        String token = authService.getTokenById(patId);
-//        Request request = new Request.Builder()
-//                .url(patConvUrl)
-//                .addHeader("Authorization", token)
-//                .post(RequestBody
-//                        .create(MediaType.parse("application/json"),
-//                                "{\n" +
-//                                        "  \"data_to_match\": \"what is shark doing?\",\n" +
-//                                        "  \"user_key\": \"eedf54ae-fe22-4a50-bff2-061ec1618d54\"\n" +
-//                                        "}"))
-//                .build();
-//        Response response = okHttpClient.newCall(request).execute();
-//        String res = response.body().string();
-//        logger.info("chat result : " + res);
-//        return res;
-//    }
+    public Message sendMeaning(Message message) {
+        String token = authService.getTokenById(patId);
+        Message responseToClient = new Message();
+        String result = processMeaning(message.getContent(), token);
+        if (!"".equals(result)) {
+            responseToClient.setSpeakerId(message.getSpeakerId());
+            responseToClient.setContent(result);
+        } else {
+            responseToClient = processMsg(message);
+        }
+        return responseToClient;
+    }
+
+    public String processMeaning(String message, String authToken){
+        Gson phaser = new Gson();
+        PatMeaningRequest patRequest = new PatMeaningRequest();
+        if ("sydney".equals(message.toLowerCase()) || "perth".equals(message.toLowerCase())
+                || "beijing".equals(message.toLowerCase())) {
+            return "You are currently in Melbourne, shall I find a Melbourne to "+message+" flight.";
+        }
+        patRequest.setText(message);
+        Request request = new Request.Builder()
+                .url(patMeaningUrl)
+                .addHeader("Authorization", authToken)
+                .post(RequestBody
+                        .create(MediaType.parse("application/json"),
+                                phaser.toJson(patRequest)))
+                .build();
+        PatMeaningResponse patResponse = new PatMeaningResponse();
+        try {
+            Response response = okHttpClient.newCall(request).execute();
+            String res = response.body().string();
+            logger.info(res);
+            patResponse = phaser.fromJson(res, PatMeaningResponse.class);
+        } catch (IOException e) {
+            logger.error("Problem on connecting PAT api service!");
+            return "";
+        }
+        if (patResponse.getData() == null) {
+            return "";
+        }
+        if (isContainedUndergoer(patResponse)) {
+            for (MeaningItem item : patResponse.getData().getResponse()) {
+                if (item.getUndergoer().get(0).getMatches().contains("flight")) {
+                    return "NP. Where do you want to go";
+                }
+            }
+        }
+
+        if (isContainedUndergoer(patResponse) && isContainedActor(patResponse)) {
+            for (MeaningItem item : patResponse.getData().getResponse()) {
+                if (item.getUndergoer().get(0).getMatches().toLowerCase().equals("what")
+                        && item.getActor().get(0).toLowerCase().contains("price")) {
+                    return "They range from $200 - $500";
+                }
+            }
+        }
+        return "";
+    }
+
+    private boolean isContainedUndergoer(PatMeaningResponse patResponse) {
+        if (patResponse.getData().getResponse().size()>0) {
+            for (MeaningItem item : patResponse.getData().getResponse()) {
+                if (item.getUndergoer().size() > 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean isContainedActor(PatMeaningResponse patResponse) {
+        if (patResponse.getData().getResponse().size()>0) {
+            for (MeaningItem item : patResponse.getData().getResponse()) {
+                if (item.getActor().size() > 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
 }

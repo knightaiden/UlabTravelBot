@@ -11,6 +11,8 @@ public class TestScript {
         Gson gson = new Gson();
         PatConvResponse res = gson.fromJson(input, PatConvResponse.class);
         System.out.println(res);
+
+
     }
 
 }
