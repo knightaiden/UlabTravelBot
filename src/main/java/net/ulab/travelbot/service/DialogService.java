@@ -1,6 +1,7 @@
 package net.ulab.travelbot.service;
 
 import com.google.gson.Gson;
+import net.ulab.travelbot.constant.FlightSchedule;
 import net.ulab.travelbot.mapper.PatUsers;
 import net.ulab.travelbot.model.*;
 import net.ulab.travelbot.model.patresponse.MeaningItem;
@@ -89,6 +90,32 @@ public class DialogService {
         if (!"".equals(result)) {
             responseToClient.setSpeakerId(message.getSpeakerId());
             responseToClient.setContent(result);
+        } else if (FlightSchedule.flightSchedule.containsKey(message.getContent())) {
+            String content = "You are currently in Melbourne, shall I find a Melbourne to "+message.getContent()+" flight.";
+            responseToClient.setSpeakerId(message.getSpeakerId());
+            responseToClient.setContent(content);
+        } else if (message.getContent().contains("wanna fly to")) {
+            String content = "One-way trip or Return?";
+            responseToClient.setSpeakerId(message.getSpeakerId());
+            responseToClient.setContent(content);
+        } else if (message.getContent().toLowerCase().contains("return")) {
+            String content = "Can I have your departure day and return day?";
+            responseToClient.setSpeakerId(message.getSpeakerId());
+            responseToClient.setContent(content);
+        } else if (message.getContent().toLowerCase().contains("2019")) {
+            String content = "How many people?";
+            responseToClient.setSpeakerId(message.getSpeakerId());
+            responseToClient.setContent(content);
+        } else if (message.getContent().toLowerCase().contains("two")) {
+            String content = "Flight information sent to your email. Thanks for using our service.";
+            responseToClient.setSpeakerId(message.getSpeakerId());
+            responseToClient.setContent(content);
+        } else if (message.getContent().toLowerCase().contains("hi")) {
+            responseToClient.setSpeakerId(message.getSpeakerId());
+            responseToClient.setContent("Hello, what can I do for you?");
+        } else if (message.getContent().toLowerCase().contains("bye")) {
+            responseToClient.setSpeakerId(message.getSpeakerId());
+            responseToClient.setContent("Bye, have a nice day~");
         } else {
             responseToClient = processMsg(message);
         }
@@ -98,10 +125,6 @@ public class DialogService {
     public String processMeaning(String message, String authToken){
         Gson phaser = new Gson();
         PatMeaningRequest patRequest = new PatMeaningRequest();
-        if ("sydney".equals(message.toLowerCase()) || "perth".equals(message.toLowerCase())
-                || "beijing".equals(message.toLowerCase())) {
-            return "You are currently in Melbourne, shall I find a Melbourne to "+message+" flight.";
-        }
         patRequest.setText(message);
         Request request = new Request.Builder()
                 .url(patMeaningUrl)
@@ -116,7 +139,7 @@ public class DialogService {
             String res = response.body().string();
             logger.info(res);
             patResponse = phaser.fromJson(res, PatMeaningResponse.class);
-        } catch (IOException e) {
+        } catch (Exception e) {
             logger.error("Problem on connecting PAT api service!");
             return "";
         }
