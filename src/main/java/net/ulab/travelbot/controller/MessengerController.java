@@ -486,7 +486,7 @@ public class MessengerController {
             Message fbMessage = new Message();
             fbMessage.setContent(text);
             fbMessage.setSpeakerId(recipientId);
-            Message result = dialogService.processMsg(fbMessage);
+            Message result = dialogService.sendMeaning(fbMessage);
 
             final TextMessage textMessage = TextMessage.create(result.getContent(), empty(), of(metadata));
             final MessagePayload messagePayload = MessagePayload.create(recipient, MessagingType.RESPONSE, textMessage,
